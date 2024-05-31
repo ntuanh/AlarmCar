@@ -136,6 +136,7 @@ void loop(){
       lcd.print("GET UP !!!");
       digitalWrite(buzzer, 1);
       GO(0);
+      //delay(100);
       stop();
       GO(1);
       stop();
@@ -256,17 +257,25 @@ void GO( int x ){
   digitalWrite(buzzer,1);
   int time = 500 ;
   if ( x == 0 ){
-    right(1);
-    left(1);
+    digitalWrite(right_forward,1);
+    digitalWrite(right_backward, 0);
+    digitalWrite(left_forward,1);
+    digitalWrite(left_backward, 0);
     delay(time);
     stop();
   }else {
     if ( x == 1 ) {
-      left(1);
+      digitalWrite(right_forward,1);
+      digitalWrite(right_backward, 0);
+      digitalWrite(left_forward,0);
+      digitalWrite(left_backward, 0);
       delay(time);
       stop();
     }else {
-      right(1);
+      digitalWrite(right_forward,0);
+      digitalWrite(right_backward, 0);
+      digitalWrite(left_forward,1);
+      digitalWrite(left_backward, 0);
       delay(time);
       stop();
     }
