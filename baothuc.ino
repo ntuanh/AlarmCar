@@ -11,15 +11,15 @@ const byte NumberOfFields = 7;
 /* khai báo các biến thời gian */
 int second, minute, hour, day, wday, month, year;
  
-const int right_forward = 5 ;
-const int right_backward = 6 ;
+const int right_forward = 6 ;
+const int right_backward = 5 ;
 const int left_forward = 7 ;
 const int left_backward = 8 ;
 const int led_blue = 11  ;
 const int led_red = 12 ;
 const int buzzer = 10 ;
 
-int hour_main = 4 ;
+int hour_main = 6 ;
 int minute_main = 6 ;
 
 const int button_1 = 4  ;
@@ -33,7 +33,7 @@ int check ;
 void setup(){
   Wire.begin();
   /* cài đặt thời gian cho module */
-  setTime(6, 05, 55, 7, 27, 5, 24); // 12:30:45 CN 08-02-2015
+  setTime(6, 05, 30, 7, 27, 5, 24); // 12:30:45 CN 08-02-2015
   Serial.begin(9600);
 
   pinMode(right_forward , OUTPUT);
@@ -45,19 +45,132 @@ void setup(){
   pinMode(buzzer, OUTPUT);
 
   lcd.init();  // Khởi tạo lcd
-  lcd.backlight();  // Bật đèn nền
+  //lcd.backlight();  // Bật đèn nền
 
   pinMode(button_3, INPUT_PULLUP);
   pinMode(button_2, INPUT_PULLUP);
   pinMode(button_1 , INPUT_PULLUP);
+
+  pinMode(led_blue, OUTPUT);
   check = 0 ;
+}
+// layout 
+
+class Status {
+  //setup();
+  public:
+  void normal();
+  void getup_status1();
+  void getup_status2();
+  void Alarm(int x, int y);
+};
+
+
+void Status::normal(){
+  lcd.noBacklight();
+  XY(0, 0);  // Di chuyển con trỏ đến vị trí (0, 0)
+  if ( hour < 10 ){
+    lcd.print(0);
+    XY(1,0);
+  }
+  lcd.print(hour);
+  XY(2,0);
+  lcd.print(":");
+  XY(3,0);
+  if(minute < 10 ){
+    lcd.print(0);
+    XY(4, 0);}
+  lcd.print(minute);
+  XY(5,0);
+  lcd.print(":");
+  XY(6, 0);
+  if(second < 10 ){
+    lcd.print(0);
+    XY(7, 0);}
+  lcd.print(second);
+
+  int location = 11;
+  XY(location,0);
+  if(day < 10 ){
+    lcd.print(0);
+    XY(location+1, 0);}
+  lcd.print(day);
+  XY(location+2,0);
+  lcd.print("/");
+  XY(location+3,0);
+  if(month < 10 ){
+    lcd.print(0);
+    XY(location+4, 0);}
+  lcd.print(month);
+  XY(location+5,0);
+
+/*
+  
+*/
+
+}
+
+
+void Status::getup_status1(){
+  lcd.backlight();
+  XY(0, 1);
+  lcd.print("                ");
+  XY(4, 1);
+  lcd.print("GET UP !!!");
+  digitalWrite(buzzer, 1);
+    GO(0);
+    stop();
+    GO(1);
+    stop();
+    GO(-1);
+    stop();
+}
+
+void Status::getup_status2(){
+  digitalWrite(buzzer, 0);
+  lcd.print("                ");
+  XY(0, 1);
+  lcd.print("Have a good day! ");
+  delay(2000);
+  XY(0, 1);
+  lcd.print("                ");
+
+}
+
+void Status::Alarm(int x, int y){
+  XY(x,y);
+  lcd.print("                           ");
+  lcd.print("Alarm  ");
+
+  int location = 7  ;
+  XY( location, 1);
+  if ( hour_main < 10){
+    lcd.print(0);
+    XY(location + 1, 1);
+  }
+  lcd.print(hour_main);
+  XY(location+ 2, 1);
+  lcd.print(":");
+  XY(location + 3, 1);
+  if ( minute_main < 10){
+    lcd.print(0);
+    XY(location+4, 1);
+    
+  }
+  lcd.print(minute_main);
 }
 
 void loop(){
+
+  if ( digitalRead(button_2) == 1){digitalWrite(led_blue,1);}
+
+  Status status ;
+
+
   if( digitalRead(button_2) == 0)mode();
   if (minute!= minute_main && check == 2){
     check =0 ;
-    lcd.setCursor(0, 1);
+    XY(0, 1);
   }
 
     /* Đọc dữ liệu của DS1307 */
@@ -65,123 +178,55 @@ void loop(){
   /* Hiển thị thời gian ra Serial monitor */
   digitalClockDisplay();
   //delay(1000);
-  lcd.setCursor(0, 0);  // Di chuyển con trỏ đến vị trí (0, 0)
-  if ( hour < 10 ){
-    lcd.print(0);
-    lcd.setCursor(1,0);
-  }
-  lcd.print(hour);
-  lcd.setCursor(2,0);
-  lcd.print(":");
-  lcd.setCursor(3,0);
-  if(minute < 10 ){
-    lcd.print(0);
-    lcd.setCursor(4, 0);}
-  lcd.print(minute);
-  lcd.setCursor(5,0);
-  lcd.print(":");
-  lcd.setCursor(6, 0);
-  if(second < 10 ){
-    lcd.print(0);
-    lcd.setCursor(7, 0);}
-  lcd.print(second);
 
+  status.normal();
 
-  int location = 11;
-  lcd.setCursor(location,0);
-  if(day < 10 ){
-    lcd.print(0);
-    lcd.setCursor(location+1, 0);}
-  lcd.print(day);
-  lcd.setCursor(location+2,0);
-  lcd.print("/");
-  lcd.setCursor(location+3,0);
-  if(month < 10 ){
-    lcd.print(0);
-    lcd.setCursor(location+4, 0);}
-  lcd.print(month);
-  lcd.setCursor(location+5,0);
-  // lcd.print("/");
-  // lcd.setCursor(location+6,0);
-  // lcd.print(year);
-
-  lcd.setCursor(1,1);
-  lcd.print("Alarm  ");
-
-  location = 7  ;
-  lcd.setCursor( location, 1);
-  if ( hour_main < 10){
-    lcd.print(0);
-    lcd.setCursor(location + 1, 1);
-  }
-  lcd.print(hour_main);
-  lcd.setCursor(location+ 2, 1);
-  lcd.print(":");
-  lcd.setCursor(location + 3, 1);
-  if ( minute_main < 10){
-    lcd.print(0);
-    lcd.setCursor(location+4, 1);
-    
-  }
-  lcd.print(minute_main);
-
-  lcd.setCursor(13 , 1 );
+  XY(13 , 1 );
   lcd.print("^.^");
   if ( hour == hour_main && minute == minute_main  && check == 0){
     check = 1;
     while( check == 1){
-      lcd.setCursor(0, 1);
-      lcd.print("                ");
-      lcd.setCursor(4, 1);
-      lcd.print("GET UP !!!");
-      digitalWrite(buzzer, 1);
-      GO(0);
-      //delay(100);
-      stop();
-      GO(1);
-      stop();
-      GO(-1);
-      stop();
+      status.getup_status1();
     
     if ( digitalRead(button_3) == 0 ){
-      digitalWrite(buzzer, 0);
-      lcd.print("                ");
-      lcd.setCursor(0, 1);
-      lcd.print("Have a good day! ");
-      delay(2000);
-      lcd.setCursor(0, 1);
-      lcd.print("                ");
+      status.getup_status2();
       check = 2;
     }
     }
   }
-  
 
 }
 
 
+
+
+
+void XY( int x , int y){
+  lcd.setCursor(x, y);
+}
+
 void mode(){
-  lcd.setCursor(0,0);
+  XY(0,0);
   lcd.print("                ");
-  lcd.setCursor(0,1);
+  XY(0,1);
   lcd.print("                ");
   int time =  500 ;
-  lcd.setCursor(0,0);
+  XY(0,0);
   lcd.print("set alarm -.-");
-  lcd.setCursor(1,1);
+  XY(1,1);
   int hour= hour_main; int minute= minute_main;
   int hour_location = 9 ; int minute_location = 12 ;
-    lcd.setCursor(hour_location-1, 1 );
+    XY(hour_location-1, 1 );
     lcd.print("[");
-    lcd.setCursor(hour_location+2, 1);
+    XY(hour_location+2, 1);
     lcd.print("]");
   while(true){
     delay(time);
     if ( hour < 10 ){
-      lcd.setCursor(hour_location , 1);
+      XY(hour_location , 1);
       lcd.print(" ");
-      lcd.setCursor(hour_location+1, 1);
-    }else lcd.setCursor(hour_location , 1);;
+      XY(hour_location+1, 1);
+    }else XY(hour_location , 1);;
     lcd.print(hour);
     if(digitalRead(button_1) == 0){
       hour++;
@@ -190,21 +235,21 @@ void mode(){
     if(digitalRead(button_2) == 0)break ;
     hour = hour % 24 ;
   }
-  lcd.setCursor(hour_location-1, 1 );
+  XY(hour_location-1, 1 );
   lcd.print(" ");
-  lcd.setCursor(hour_location+2, 1);
+  XY(hour_location+2, 1);
   lcd.print(" ");
-  lcd.setCursor(minute_location-1, 1 );
+  XY(minute_location-1, 1 );
   lcd.print("[");
-  lcd.setCursor(minute_location+2, 1);
+  XY(minute_location+2, 1);
   lcd.print("]");
   while(true){
     delay(time);
     if ( minute < 10 ){
-      lcd.setCursor(minute_location , 1);
+      XY(minute_location , 1);
       lcd.print(0);
-      lcd.setCursor(minute_location+1, 1);
-    }else lcd.setCursor(minute_location , 1);;
+      XY(minute_location+1, 1);
+    }else XY(minute_location , 1);;
     lcd.print(minute);
     if(digitalRead(button_1) == 0){
       minute++;
@@ -219,32 +264,13 @@ void mode(){
   
   hour_main = hour ;
   minute_main = minute;
-  lcd.setCursor(0,0);
+  XY(0,0);
   lcd.print("                ");
-  lcd.setCursor(0,1);
+  XY(0,1);
   lcd.print("                ");
   delay(time);
 }
 
-void led(){
-  int time = 300 ;
-  digitalWrite(led_blue , 1);
-  digitalWrite(led_red, 0);
-  delay(time);
-  digitalWrite(led_blue, 0);
-  digitalWrite(led_red , 1);
-  delay(time);
-}
-
-void right(int n ){
-  digitalWrite(right_forward , n);
-  digitalWrite(right_forward , abs(n-1));
-}
-
-void left(int n ){
-  digitalWrite(left_forward , n);
-  digitalWrite(left_backward , abs(n-1));
-}
 
 void stop(){
   digitalWrite(right_backward,0);
