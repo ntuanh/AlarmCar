@@ -205,6 +205,7 @@ class Status {
 
 
 void Status::normal(){
+  stop();
   lcd.noBacklight();
   XY(0, 0);  // Di chuyển con trỏ đến vị trí (0, 0)
   if ( hour < 10 ){
@@ -248,23 +249,25 @@ void Status::normal(){
 
 
 void Status::getup_status1(){
-  sound();
+  
   lcd.backlight();
   XY(0, 1);
   lcd.print("                ");
   XY(4, 1);
   lcd.print("GET UP !!!");
-  digitalWrite(buzzer, 1);
+  sound();
+  /*digitalWrite(buzzer, 1);
     GO(0);
     stop();
     GO(1);
     stop();
     GO(-1);
-    stop();
+    stop();*/
 }
 
 void Status::getup_status2(){
   //sound();
+  lcd.backlight();
   lcd.print("                ");
   XY(0, 1);
   lcd.print("Have a good day! ");
@@ -410,6 +413,21 @@ void stop(){
   digitalWrite(left_forward, 0);
 }
 
+void right(){
+  digitalWrite(right_forward,1);
+  digitalWrite(right_backward, 0);
+  digitalWrite(left_forward,0);
+  digitalWrite(left_backward, 0);
+}
+
+void left(){
+  digitalWrite(right_forward,0);
+  digitalWrite(right_backward, 0);
+  digitalWrite(left_forward,1);
+  digitalWrite(left_backward, 0);
+  
+}
+
 void GO( int x ){
   digitalWrite(buzzer,1);
   int time = 500 ;
@@ -488,7 +506,13 @@ void sound()
   // Loop through each note
   for (int i = 0; i < totalNotes; i++)
   {
+    int cnt = i / 7 ;
+    cnt = cnt % 2 ;
+    if ( cnt == 0){
+      right();
+    }else left();
     const int currentNote = notes[i];
+    Serial.println(i);
     float wait = durations[i] / songSpeed;
     // Play tone if currentNote is not 0 frequency, otherwise pause (noTone)
     if (currentNote != 0)
@@ -504,4 +528,4 @@ void sound()
 
     if(digitalRead(button_3) == 0)break;
   }
-}
+} 
