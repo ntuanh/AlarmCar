@@ -1,7 +1,142 @@
 // https://wokwi.com/projects/399424216918261761
 
+// setup music
+#include "pitches.h"
+
+// Define pin 10 for buzzer, you can use any other digital pins (Pin 0-13)
+ int buzzer = 10;
+
+// Change to 0.5 for a slower version of the song, 1.25 for a faster version
+const float songSpeed = 1.0;
+
+// Defining frequency of each music note
+#define NOTE_C4 262
+#define NOTE_D4 294
+#define NOTE_E4 330
+#define NOTE_F4 349
+#define NOTE_G4 392
+#define NOTE_A4 440
+#define NOTE_B4 494
+#define NOTE_C5 523
+#define NOTE_D5 587
+#define NOTE_E5 659
+#define NOTE_F5 698
+#define NOTE_G5 784
+#define NOTE_A5 880
+#define NOTE_B5 988
+
+// Music notes of the song, 0 is a rest/pulse
+int notes[] = {
+    NOTE_E4, NOTE_G4, NOTE_A4, NOTE_A4, 0,
+    NOTE_A4, NOTE_B4, NOTE_C5, NOTE_C5, 0,
+    NOTE_C5, NOTE_D5, NOTE_B4, NOTE_B4, 0,
+    NOTE_A4, NOTE_G4, NOTE_A4, 0,
+
+    NOTE_E4, NOTE_G4, NOTE_A4, NOTE_A4, 0,
+    NOTE_A4, NOTE_B4, NOTE_C5, NOTE_C5, 0,
+    NOTE_C5, NOTE_D5, NOTE_B4, NOTE_B4, 0,
+    NOTE_A4, NOTE_G4, NOTE_A4, 0,
+
+    NOTE_E4, NOTE_G4, NOTE_A4, NOTE_A4, 0,
+    NOTE_A4, NOTE_C5, NOTE_D5, NOTE_D5, 0,
+    NOTE_D5, NOTE_E5, NOTE_F5, NOTE_F5, 0,
+    NOTE_E5, NOTE_D5, NOTE_E5, NOTE_A4, 0,
+
+    NOTE_A4, NOTE_B4, NOTE_C5, NOTE_C5, 0,
+    NOTE_D5, NOTE_E5, NOTE_A4, 0,
+    NOTE_A4, NOTE_C5, NOTE_B4, NOTE_B4, 0,
+    NOTE_C5, NOTE_A4, NOTE_B4, 0,
+
+    NOTE_A4, NOTE_A4,
+    //Repeat of first part
+    NOTE_A4, NOTE_B4, NOTE_C5, NOTE_C5, 0,
+    NOTE_C5, NOTE_D5, NOTE_B4, NOTE_B4, 0,
+    NOTE_A4, NOTE_G4, NOTE_A4, 0,
+
+    NOTE_E4, NOTE_G4, NOTE_A4, NOTE_A4, 0,
+    NOTE_A4, NOTE_B4, NOTE_C5, NOTE_C5, 0,
+    NOTE_C5, NOTE_D5, NOTE_B4, NOTE_B4, 0,
+    NOTE_A4, NOTE_G4, NOTE_A4, 0,
+
+    NOTE_E4, NOTE_G4, NOTE_A4, NOTE_A4, 0,
+    NOTE_A4, NOTE_C5, NOTE_D5, NOTE_D5, 0,
+    NOTE_D5, NOTE_E5, NOTE_F5, NOTE_F5, 0,
+    NOTE_E5, NOTE_D5, NOTE_E5, NOTE_A4, 0,
+
+    NOTE_A4, NOTE_B4, NOTE_C5, NOTE_C5, 0,
+    NOTE_D5, NOTE_E5, NOTE_A4, 0,
+    NOTE_A4, NOTE_C5, NOTE_B4, NOTE_B4, 0,
+    NOTE_C5, NOTE_A4, NOTE_B4, 0,
+    //End of Repeat
+
+    NOTE_E5, 0, 0, NOTE_F5, 0, 0,
+    NOTE_E5, NOTE_E5, 0, NOTE_G5, 0, NOTE_E5, NOTE_D5, 0, 0,
+    NOTE_D5, 0, 0, NOTE_C5, 0, 0,
+    NOTE_B4, NOTE_C5, 0, NOTE_B4, 0, NOTE_A4,
+
+    NOTE_E5, 0, 0, NOTE_F5, 0, 0,
+    NOTE_E5, NOTE_E5, 0, NOTE_G5, 0, NOTE_E5, NOTE_D5, 0, 0,
+    NOTE_D5, 0, 0, NOTE_C5, 0, 0,
+    NOTE_B4, NOTE_C5, 0, NOTE_B4, 0, NOTE_A4};
+
+// Durations (in ms) of each music note of the song
+// Quarter Note is 250 ms when songSpeed = 1.0
+int durations[] = {
+    125, 125, 250, 125, 125,
+    125, 125, 250, 125, 125,
+    125, 125, 250, 125, 125,
+    125, 125, 375, 125,
+
+    125, 125, 250, 125, 125,
+    125, 125, 250, 125, 125,
+    125, 125, 250, 125, 125,
+    125, 125, 375, 125,
+
+    125, 125, 250, 125, 125,
+    125, 125, 250, 125, 125,
+    125, 125, 250, 125, 125,
+    125, 125, 125, 250, 125,
+
+    125, 125, 250, 125, 125,
+    250, 125, 250, 125,
+    125, 125, 250, 125, 125,
+    125, 125, 375, 375,
+
+    250, 125,
+    //Rpeat of First Part
+    125, 125, 250, 125, 125,
+    125, 125, 250, 125, 125,
+    125, 125, 375, 125,
+
+    125, 125, 250, 125, 125,
+    125, 125, 250, 125, 125,
+    125, 125, 250, 125, 125,
+    125, 125, 375, 125,
+
+    125, 125, 250, 125, 125,
+    125, 125, 250, 125, 125,
+    125, 125, 250, 125, 125,
+    125, 125, 125, 250, 125,
+
+    125, 125, 250, 125, 125,
+    250, 125, 250, 125,
+    125, 125, 250, 125, 125,
+    125, 125, 375, 375,
+    //End of Repeat
+
+    250, 125, 375, 250, 125, 375,
+    125, 125, 125, 125, 125, 125, 125, 125, 375,
+    250, 125, 375, 250, 125, 375,
+    125, 125, 125, 125, 125, 500,
+
+    250, 125, 375, 250, 125, 375,
+    125, 125, 125, 125, 125, 125, 125, 125, 375,
+    250, 125, 375, 250, 125, 375,
+    125, 125, 125, 125, 125, 500};
 #include<Wire.h>
 #include <LiquidCrystal_I2C.h>
+
+//#include "sound.h"
 
 LiquidCrystal_I2C lcd(0x27, 16, 2); // Địa chỉ I2C là 0x27, 16 cột và 2 hàng
 
@@ -19,10 +154,10 @@ const int left_forward = 7 ;
 const int left_backward = 8 ;
 const int led_blue = 11  ;
 const int led_red = 12 ;
-const int buzzer = 10 ;
 
-int hour_main = 6 ;
-int minute_main = 6 ;
+
+int hour_main = 10 ;
+int minute_main =27 ;
 
 const int button_1 = 4  ;
 const int button_2 = 3 ;
@@ -35,7 +170,7 @@ int check ;
 void setup(){
   Wire.begin();
   /* cài đặt thời gian cho module */
-  setTime(6, 05, 30, 7, 27, 5, 24); // 12:30:45 CN 08-02-2015
+  setTime(10, 26 , 55, 7, 1, 6, 24); // 12:30:45 CN 08-02-2015
   Serial.begin(9600);
 
   pinMode(right_forward , OUTPUT);
@@ -46,8 +181,7 @@ void setup(){
   pinMode(led_red, OUTPUT);
   pinMode(buzzer, OUTPUT);
 
-  lcd.init();  // Khởi tạo lcd
-  //lcd.backlight();  // Bật đèn nền
+  lcd.init(); 
 
   pinMode(button_3, INPUT_PULLUP);
   pinMode(button_2, INPUT_PULLUP);
@@ -55,6 +189,7 @@ void setup(){
 
   pinMode(led_blue, OUTPUT);
   check = 0 ;
+  
 }
 // layout 
 
@@ -65,6 +200,7 @@ class Status {
   void getup_status1();
   void getup_status2();
   void Alarm(int x, int y);
+  void mode();
 };
 
 
@@ -106,14 +242,13 @@ void Status::normal(){
   lcd.print(month);
   XY(location+5,0);
 
-/*
-  
-*/
+
 
 }
 
 
 void Status::getup_status1(){
+  sound();
   lcd.backlight();
   XY(0, 1);
   lcd.print("                ");
@@ -129,7 +264,7 @@ void Status::getup_status1(){
 }
 
 void Status::getup_status2(){
-  digitalWrite(buzzer, 0);
+  //sound();
   lcd.print("                ");
   XY(0, 1);
   lcd.print("Have a good day! ");
@@ -162,57 +297,12 @@ void Status::Alarm(int x, int y){
   lcd.print(minute_main);
 }
 
-void loop(){
-
-  if ( digitalRead(button_2) == 1){digitalWrite(led_blue,1);}
-
-  Status status ;
-
-
-  if( digitalRead(button_2) == 0)mode();
-  if (minute!= minute_main && check == 2){
-    check =0 ;
-    XY(0, 1);
-  }
-
-    /* Đọc dữ liệu của DS1307 */
-  readDS1307();
-  /* Hiển thị thời gian ra Serial monitor */
-  digitalClockDisplay();
-  //delay(1000);
-
-  status.normal();
-
-  XY(13 , 1 );
-  lcd.print("^.^");
-  if ( hour == hour_main && minute == minute_main  && check == 0){
-    check = 1;
-    while( check == 1){
-      status.getup_status1();
-    
-    if ( digitalRead(button_3) == 0 ){
-      status.getup_status2();
-      check = 2;
-    }
-    }
-  }
-
-}
-
-
-
-
-
-void XY( int x , int y){
-  lcd.setCursor(x, y);
-}
-
-void mode(){
+void Status::mode(){
   XY(0,0);
   lcd.print("                ");
   XY(0,1);
   lcd.print("                ");
-  int time =  500 ;
+  int time =  300 ;
   XY(0,0);
   lcd.print("set alarm -.-");
   XY(1,1);
@@ -258,7 +348,6 @@ void mode(){
       delay(time);
     }
     if(digitalRead(button_2) == 0){
-      //delay(1000);
       break;
     }
     minute = minute % 60 ;
@@ -273,6 +362,46 @@ void mode(){
   delay(time);
 }
 
+void loop(){
+  Status status ;
+  if ( digitalRead(button_2) == 1){digitalWrite(led_blue,1);}
+
+  if( digitalRead(button_2) == 0)status.mode();
+  if (minute!= minute_main && check == 2){
+    check =0 ;
+    XY(0, 1);
+  }
+
+    /* Đọc dữ liệu của DS1307 */
+  readDS1307();
+
+  status.normal();
+
+  XY(13 , 1 );
+  lcd.print("^.^");
+  if ( hour == hour_main && minute == minute_main  && check == 0){
+    check = 1;
+    while( check == 1){
+      status.getup_status1();
+    
+    if ( digitalRead(button_3) == 0 ){
+      status.getup_status2();
+      check = 2;
+    }
+    }
+  }
+
+}
+
+
+
+
+
+void XY( int x , int y){
+  lcd.setCursor(x, y);
+}
+
+// *** motor driver 
 
 void stop(){
   digitalWrite(right_backward,0);
@@ -310,6 +439,8 @@ void GO( int x ){
   }
   digitalWrite(buzzer,0);
 }
+
+// set time 
 void readDS1307()
 {
         Wire.beginTransmission(DS1307);
@@ -336,30 +467,6 @@ int dec2bcd(byte num)
 {
         return ((num/10 * 16) + (num % 10));
 }
- 
-void digitalClockDisplay(){
-    // digital clock display of the time
-    Serial.print(hour);
-    printDigits(minute);
-    printDigits(second);
-    Serial.print(" ");
-    Serial.print(day);
-    Serial.print(" ");
-    Serial.print(month);
-    Serial.print(" ");
-    Serial.print(year); 
-    Serial.println(); 
-}
- 
-void printDigits(int digits){
-    // các thành phần thời gian được ngăn chách bằng dấu :
-    Serial.print(":");
-        
-    if(digits < 10)
-        Serial.print('0');
-    Serial.print(digits);
-}
- 
 /* cài đặt thời gian cho DS1307 */
 void setTime(byte hr, byte min, byte sec, byte wd, byte d, byte mth, byte yr)
 {
@@ -373,4 +480,28 @@ void setTime(byte hr, byte min, byte sec, byte wd, byte d, byte mth, byte yr)
         Wire.write(dec2bcd(mth));
         Wire.write(dec2bcd(yr));
         Wire.endTransmission();
+}
+
+// sound
+void sound()
+{  const int totalNotes = sizeof(notes) / sizeof(int);
+  // Loop through each note
+  for (int i = 0; i < totalNotes; i++)
+  {
+    const int currentNote = notes[i];
+    float wait = durations[i] / songSpeed;
+    // Play tone if currentNote is not 0 frequency, otherwise pause (noTone)
+    if (currentNote != 0)
+    {
+      tone(buzzer, notes[i], wait); // tone(pin, frequency, duration)
+    }
+    else
+    {
+      noTone(buzzer);
+    }
+    // delay is used to wait for tone to finish playing before moving to next loop
+    delay(wait);
+
+    if(digitalRead(button_3) == 0)break;
+  }
 }
