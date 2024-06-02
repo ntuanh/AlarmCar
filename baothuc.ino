@@ -2,6 +2,26 @@
 
 // setup music
 #include "pitches.h"
+#include <EEPROM.h>
+#define HOUR_ADRESS 0 
+#define MINUTE_ADRESS 1
+#define ENABLE_ADRESS 2 
+
+typedef struct Alarm{
+  bool enable ;
+  byte hour_alarm ;
+  byte minute_alarm ;
+}Alarm ;
+
+
+Alarm readAlarmEEPROM(){
+  Alarm  alarm ;
+    alarm.enable = EEPROM.read(ENABLE_ADRESS) ;
+    alarm.hour_alarm = EEPROM.read(HOUR_ADRESS);
+    alarm.minute_alarm = EEPROM.read(MINUTE_ADRESS);
+    return alarm;
+}
+
 
 // Define pin 10 for buzzer, you can use any other digital pins (Pin 0-13)
  int buzzer = 10;
@@ -156,8 +176,8 @@ const int led_blue = 11  ;
 const int led_red = 12 ;
 
 
-int hour_main = 10 ;
-int minute_main =27 ;
+int hour_main  ;
+int minute_main ;
 
 const int button_1 = 4  ;
 const int button_2 = 3 ;
@@ -166,12 +186,24 @@ const int button_3 = 2 ;
 
 int check ;
 
-
+ Alarm alarm ;
 void setup(){
+Serial.begin(9600);
+  alarm = readAlarmEEPROM();
+  Serial.println("infor");
+  Serial.println(alarm.enable);
+  Serial.println(alarm.hour_alarm);
+  Serial.println(alarm.minute_alarm);
+
+  if ( alarm.enable == 1 ){
+    hour_main = alarm.hour_alarm ;
+    minute_main = alarm.minute_alarm;
+  }
+  //if ( hour_main ==  255)hour_main = 48 ;
   Wire.begin();
   /* cài đặt thời gian cho module */
-  setTime(10, 26 , 55, 7, 1, 6, 24); // 12:30:45 CN 08-02-2015
-  Serial.begin(9600);
+  //setTime(12, 27 , 25, 7, 2, 6, 24); // 12:30:45 CN 08-02-2015
+  
 
   pinMode(right_forward , OUTPUT);
   pinMode(left_forward , OUTPUT);
@@ -189,6 +221,7 @@ void setup(){
 
   pinMode(led_blue, OUTPUT);
   check = 0 ;
+  //Serial.println(hour_main);
   
 }
 // layout 
@@ -309,6 +342,7 @@ void Status::mode(){
   XY(0,0);
   lcd.print("set alarm -.-");
   XY(1,1);
+  //if ( hour_main != 255 ){
   int hour= hour_main; int minute= minute_main;
   int hour_location = 9 ; int minute_location = 12 ;
     XY(hour_location-1, 1 );
@@ -321,8 +355,14 @@ void Status::mode(){
       XY(hour_location , 1);
       lcd.print(" ");
       XY(hour_location+1, 1);
-    }else XY(hour_location , 1);;
-    lcd.print(hour);
+    }else XY(hour_location , 1);
+    if ( hour != 255)lcd.print(hour);else lcd.print("  ");
+    if ( minute < 10 ){
+      XY(minute_location , 1);
+      lcd.print(0);
+      XY(minute_location+1, 1);
+    }else XY(minute_location , 1);;
+    if ( minute != 255)lcd.print(minute);else lcd.print("  ");
     if(digitalRead(button_1) == 0){
       hour++;
       delay(time);
@@ -345,7 +385,7 @@ void Status::mode(){
       lcd.print(0);
       XY(minute_location+1, 1);
     }else XY(minute_location , 1);;
-    lcd.print(minute);
+    if ( minute != 255)lcd.print(minute);else lcd.print("  ");
     if(digitalRead(button_1) == 0){
       minute++;
       delay(time);
@@ -355,14 +395,22 @@ void Status::mode(){
     }
     minute = minute % 60 ;
   }
-  
   hour_main = hour ;
   minute_main = minute;
   XY(0,0);
   lcd.print("                ");
   XY(0,1);
   lcd.print("                ");
+  if ( hour_main != 225 && minute_main != 225 ){
+    byte h = hour ;
+    byte m = minute ;
+    //alarm.hour_alarm = h ;
+    //alarm.minute_alarm = m ;
+    EEPROM.write(HOUR_ADRESS , h);
+    EEPROM.write(MINUTE_ADRESS , m);
+  }
   delay(time);
+//}
 }
 
 void loop(){
@@ -426,6 +474,14 @@ void left(){
   digitalWrite(left_forward,1);
   digitalWrite(left_backward, 0);
   
+}
+
+void forward(){
+  digitalWrite(right_forward,1);
+  digitalWrite(right_backward, 0);
+  digitalWrite(left_forward,1);
+  digitalWrite(left_backward, 0);
+
 }
 
 void GO( int x ){
@@ -506,13 +562,24 @@ void sound()
   // Loop through each note
   for (int i = 0; i < totalNotes; i++)
   {
-    int cnt = i / 7 ;
-    cnt = cnt % 2 ;
-    if ( cnt == 0){
-      right();
-    }else left();
+    if( i % 10 == 0){
+      int ran = random(0,3);
+      Serial.println(ran);
+      //int d = ran % 3 ;
+      switch(ran){
+        case 0 :
+        forward();
+        break;
+        case 1 :
+        left();
+        break;
+        case 2 :
+        right();
+        break;
+      }
+    }
     const int currentNote = notes[i];
-    Serial.println(i);
+    //Serial.println(i);
     float wait = durations[i] / songSpeed;
     // Play tone if currentNote is not 0 frequency, otherwise pause (noTone)
     if (currentNote != 0)
